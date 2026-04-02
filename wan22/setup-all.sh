@@ -17,7 +17,7 @@ NODES="$COMFYUI/custom_nodes"
 MODELS="$COMFYUI/models"
 
 echo "════════════════════════════════════════"
-echo "  🚀 Wan2.2 Remix — RunPod Setup v5"
+echo "  🚀 Wan2.2 Remix — RunPod Setup v6"
 echo "  ComfyUI: $COMFYUI"
 echo "════════════════════════════════════════"
 [ -d "$COMFYUI" ] || { echo "❌ НЕ НАЙДЕНО: $COMFYUI"; exit 1; }
@@ -29,7 +29,7 @@ mkdir -p "$NODES" && cd "$NODES"
 
 clone() {
     local n=$(basename "$1" .git)
-    if [ -d "$n" ]; then echo "  ✅ $n"
+    if [ -d "$n" ]; then echo "  ✅ $n"; cd "$n" && git pull --quiet 2>/dev/null && cd ..
     else echo "  📥 $n..."; git clone "$1" "$n" --quiet && echo "  ✅ $n"
     fi
 }
@@ -42,53 +42,68 @@ clone https://github.com/cubiq/ComfyUI_essentials
 clone https://github.com/princepainter/ComfyUI-PainterNodes
 clone https://github.com/princepainter/Comfyui-PainterVRAM
 
-# ════ 2/4 МОДЕЛИ ════
+# ════ 2/4 MODELS ════
 echo ""
 echo "▶ 2/4 Модели..."
 mkdir -p "$MODELS/diffusion_models" "$MODELS/vae" "$MODELS/clip"
+
 pip install -q huggingface_hub 2>/dev/null
 
+# Качаем HF в temp → ищем файл → копируем куда надо → чистим temp
 dl() {
-    local repo="$1" fname="$2" ldir="$3" label="$4"
-    local base=$(basename "$fname")
-    local found=$(find "$ldir" -name "$base" -type f 2>/dev/null | head -1)
-    if [ -n "$found" ]; then
-        echo "  ✅ $label ($(du -h "$found" | cut -f1))"
+    local repo="$1" fname="$2" dest="$3" label="$4"
+
+    if [ -f "$dest" ]; then
+        echo "  ✅ $label ($(du -h "$dest" | cut -f1))"
         return
     fi
+
     echo "  📥 $label..."
-    # ВАЖНО: только именованные параметры!
-    python3 << PYEOF
+    python3 - "$repo" "$fname" "$dest" << 'PYEND'
+import sys, os, shutil, glob
+repo, fname, dest = sys.argv[1], sys.argv[2], sys.argv[3]
+base = os.path.basename(fname)
+tmpdir = "/tmp/_hf_model_dl"
+os.makedirs(tmpdir, exist_ok=True)
 from huggingface_hub import hf_hub_download
-hf_hub_download(
-    repo_id="${repo}",
-    filename="${fname}",
-    local_dir="${ldir}"
-)
-PYEOF
-    local found2=$(find "$ldir" -name "$base" -type f 2>/dev/null | head -1)
-    [ -n "$found2" ] && echo "  ✅ $label ($(du -h "$found2" | cut -f1))" || echo "  ❌ $label"
+hf_hub_download(repo_id=repo, filename=fname, local_dir=tmpdir)
+found = glob.glob(os.path.join(tmpdir, "**", base), recursive=True)
+if found:
+    shutil.copy2(found[0], dest)
+    sz = os.path.getsize(dest)
+    print(f"  ✅ Скачано {sz//1024//1024} MB → {dest}")
+else:
+    print(f"  ❌ Файл не найден")
+PYEND
+
+    if [ -f "$dest" ]; then
+        echo "     Размер: $(du -h "$dest" | cut -f1)"
+    else
+        echo "  ❌ Ошибка: $label"
+    fi
 }
 
 dl "FX-FeiHou/wan2.2-Remix" \
    "NSFW/Wan2.2_Remix_NSFW_i2v_14b_high_lighting_fp8_e4m3fn_v2.1.safetensors" \
-   "$MODELS/diffusion_models" \
+   "$MODELS/diffusion_models/Wan2.2_Remix_NSFW_i2v_14b_high_lighting_fp8_e4m3fn_v2.1.safetensors" \
    "UNET High (~14 GB)"
 
 dl "FX-FeiHou/wan2.2-Remix" \
    "NSFW/Wan2.2_Remix_NSFW_i2v_14b_low_lighting_fp8_e4m3fn_v2.1.safetensors" \
-   "$MODELS/diffusion_models" \
+   "$MODELS/diffusion_models/Wan2.2_Remix_NSFW_i2v_14b_low_lighting_fp8_e4m3fn_v2.1.safetensors" \
    "UNET Low  (~14 GB)"
 
 dl "Comfy-Org/Wan_2.2_ComfyUI_Repackaged" \
    "split_files/vae/wan_2.1_vae.safetensors" \
-   "$MODELS/vae" \
+   "$MODELS/vae/wan_2.1_vae.safetensors" \
    "VAE (~250 MB)"
 
 dl "zootkitty/nsfw_wan_umt5-xxl_bf16_fixed" \
    "nsfw_wan_umt5-xxl_bf16_fixed.safetensors" \
-   "$MODELS/clip" \
+   "$MODELS/clip/nsfw_wan_umt5-xxl_bf16_fixed.safetensors" \
    "CLIP (~11 GB)"
+
+rm -rf /tmp/_hf_model_dl
 
 # ════ 3/4 ЗАВИСИМОСТИ ════
 echo ""
