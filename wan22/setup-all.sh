@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# set -e disabled for git operations
 
 # ════ Автопоиск ComfyUI ════
 COMFYUI=""
@@ -29,7 +29,7 @@ mkdir -p "$NODES" && cd "$NODES"
 
 clone() {
     local n=$(basename "$1" .git)
-    if [ -d "$n" ]; then echo "  ✅ $n"; cd "$n" && git pull --quiet 2>/dev/null && cd ..
+    if [ -d "$n" ]; then echo "  ✅ $n"; (cd "$n" && git pull --quiet 2>/dev/null)
     else echo "  📥 $n..."; git clone "$1" "$n" --quiet && echo "  ✅ $n"
     fi
 }
