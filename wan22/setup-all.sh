@@ -1,56 +1,36 @@
 #!/bin/bash
-# ═══════════════════════════════════════════════════════════
-#  Wan2.2 Remix — RunPod Setup (v3)
-#  Автопоиск ComfyUI + ноды + модели + зависимости
-# ═══════════════════════════════════════════════════════════
-
 set -e
 
-echo "🔍 Ищу ComfyUI..."
-
-# Автопоиск в типичных местах
+# ════ Автопоиск ComfyUI ════
 COMFYUI=""
 for d in /workspace/runpod-slim/ComfyUI /workspace/ComfyUI /root/ComfyUI /ComfyUI; do
-    if [ -d "$d" ]; then
-        COMFYUI="$d"
-        break
-    fi
+    [ -d "$d" ] && COMFYUI="$d" && break
 done
 
-# Если не нашли — спрашиваем
 if [ -z "$COMFYUI" ]; then
     read -p "🔧 Путь к ComfyUI: " COMFYUI
-    if [[ "$COMFYUI" != /* ]]; then
-        COMFYUI="/workspace/$COMFYUI"
-    fi
+    [[ "$COMFYUI" != /* ]] && COMFYUI="/workspace/$COMFYUI"
 fi
+COMFYUI="${COMFYUI%/}"
 
 NODES="$COMFYUI/custom_nodes"
 MODELS="$COMFYUI/models"
 
-echo "═══════════════════════════════════════════"
+echo "════════════════════════════════════════"
 echo "  🚀 Wan2.2 Remix — RunPod Setup"
-echo "  Путь: $COMFYUI"
-echo "═══════════════════════════════════════════"
+echo "  ComfyUI: $COMFYUI"
+echo "════════════════════════════════════════"
+[ -d "$COMFYUI" ] || { echo "❌ НЕ НАЙДЕНО: $COMFYUI"; exit 1; }
 
-if [ ! -d "$COMFYUI" ]; then
-    echo "❌ НЕ НАЙДЕНО: $COMFYUI"
-    exit 1
-fi
-
-# ── 1/4 НОДЫ ──
+# ════ 1/4 НОДЫ ════
 echo ""
-echo "▶ 1/4 Кастомные ноды..."
-mkdir -p "$NODES"
-cd "$NODES"
+echo "▶ 1/4 Ноды..."
+mkdir -p "$NODES" && cd "$NODES"
 
 clone() {
-    local name=$(basename "$1" .git)
-    if [ -d "$name" ]; then
-        echo "  ✅ $name"
-    else
-        echo "  📥 $name..."
-        git clone "$1" "$name" --quiet && echo "  ✅ $name"
+    local n=$(basename "$1" .git)
+    if [ -d "$n" ]; then echo "  ✅ $n"
+    else echo "  📥 $n..."; git clone "$1" "$n" --quiet && echo "  ✅ $n"
     fi
 }
 
@@ -62,46 +42,47 @@ clone https://github.com/cubiq/ComfyUI_essentials
 clone https://github.com/princepainter/ComfyUI-PainterNodes
 clone https://github.com/princepainter/Comfyui-PainterVRAM
 
-# ── 2/4 МОДЕЛИ ──
+# ════ 2/4 МОДЕЛИ ════
 echo ""
 echo "▶ 2/4 Модели..."
 mkdir -p "$MODELS/diffusion_models" "$MODELS/vae" "$MODELS/clip"
-
 pip install -q huggingface_hub 2>/dev/null
 
 dl() {
-    local label="$4"
-    local base=$(basename "$2")
-    local found=$(find "$3" -name "$base" -type f 2>/dev/null | head -1)
+    local repo=$1 fname=$2 ldir=$3 label=$4
+    local base=$(basename "$fname")
+    local found=$(find "$ldir" -name "$base" -type f 2>/dev/null | head -1)
     if [ -n "$found" ]; then
         echo "  ✅ $label ($(du -h "$found" | cut -f1))"
-        return 0
+        return
     fi
     echo "  📥 $label..."
-    python3 -c "from huggingface_hub import hf_hub_download; hf_hub_download('$1','$2','$3')"
-    local found2=$(find "$3" -name "$base" -type f 2>/dev/null | head -1)
-    [ -n "$found2" ] && echo "  ✅ $label ($(du -h "$found2" | cut -f1))"
+    python3 -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='${repo}', filename='${fname}', local_dir='${ldir}')"
+    found=$(find "$ldir" -name "$base" -type f 2>/dev/null | head -1)
+    [ -n "$found" ] && echo "  ✅ $label ($(du -h "$found" | cut -f1))" || echo "  ❌ $label — ошибка"
 }
 
-dl "FX-FeiHou/wan2.2-Remix" "NSFW/Wan2.2_Remix_NSFW_i2v_14b_high_lighting_fp8_e4m3fn_v2.1.safetensors" "$MODELS/diffusion_models" "UNET High"
-dl "FX-FeiHou/wan2.2-Remix" "NSFW/Wan2.2_Remix_NSFW_i2v_14b_low_lighting_fp8_e4m3fn_v2.1.safetensors" "$MODELS/diffusion_models" "UNET Low"
-dl "Comfy-Org/Wan_2.2_ComfyUI_Repackaged" "split_files/vae/wan_2.1_vae.safetensors" "$MODELS/vae" "VAE"
-dl "zootkitty/nsfw_wan_umt5-xxl_bf16_fixed" "nsfw_wan_umt5-xxl_bf16_fixed.safetensors" "$MODELS/clip" "CLIP"
+dl "FX-FeiHou/wan2.2-Remix" "NSFW/Wan2.2_Remix_NSFW_i2v_14b_high_lighting_fp8_e4m3fn_v2.1.safetensors" "$MODELS/diffusion_models" "UNET High (~14 GB)"
+dl "FX-FeiHou/wan2.2-Remix" "NSFW/Wan2.2_Remix_NSFW_i2v_14b_low_lighting_fp8_e4m3fn_v2.1.safetensors"  "$MODELS/diffusion_models" "UNET Low  (~14 GB)"
+dl "Comfy-Org/Wan_2.2_ComfyUI_Repackaged" "split_files/vae/wan_2.1_vae.safetensors" "$MODELS/vae" "VAE (~250 MB)"
+dl "zootkitty/nsfw_wan_umt5-xxl_bf16_fixed" "nsfw_wan_umt5-xxl_bf16_fixed.safetensors" "$MODELS/clip" "CLIP (~11 GB)"
 
-# ── 3/4 ЗАВИСИМОСТИ ──
+# ════ 3/4 ЗАВИСИМОСТИ ════
 echo ""
 echo "▶ 3/4 Зависимости..."
-for d in "$NODES"/ComfyUI-KJNodes "$NODES"/ComfyUI-VideoHelperSuite "$NODES"/ComfyUI_LayerStyle "$NODES"/rgthree-comfy "$NODES"/ComfyUI_essentials "$NODES"/ComfyUI-PainterNodes "$NODES"/Comfyui-PainterVRAM; do
-    if [ -f "$d/requirements.txt" ]; then
-        echo "  📦 $(basename "$d")..."
-        pip install -r "$d/requirements.txt" -q 2>/dev/null || true
-    fi
+for d in KJNodes VideoHelperSuite ComfyUI_LayerStyle rgthree-comfy ComfyUI_essentials ComfyUI-PainterNodes Comfyui-PainterVRAM; do
+    r="$NODES/ComfyUI-$d"
+    [ "$d" = "KJNodes" ] && r="$NODES/ComfyUI-KJNodes"
+    [ "$d" = "Comfyui-PainterVRAM" ] && r="$NODES/Comfyui-PainterVRAM"
+    [ -f "$r/requirements.txt" ] && echo "  📦 $(basename "$r")..." && pip install -r "$r/requirements.txt" -q 2>/dev/null || true
 done
 
-# ── 4/4 ПРОВЕРКА ──
+# ════ 4/4 ИТОГ ════
 echo ""
-echo "═══════════════════════════════════════════"
-echo " ✅ ГОТОВО!"
+echo "════════════════════════════════════════"
+echo "  🎉 ВСЁ ГОТОВО!"
 echo ""
-echo "  Перезапусти ComfyUI → Import workflow → Queue!"
-echo "═══════════════════════════════════════════"
+echo "  1. Перезапусти ComfyUI"
+echo "  2. Import: wan22-remix-workflow.json"
+echo "  3. Queue Prompt → Поехали!"
+echo "════════════════════════════════════════"
