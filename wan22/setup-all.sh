@@ -17,7 +17,7 @@ NODES="$COMFYUI/custom_nodes"
 MODELS="$COMFYUI/models"
 
 echo "════════════════════════════════════════"
-echo "  🚀 Wan2.2 Remix — RunPod Setup v6"
+echo "  🚀 Wan2.2 Remix — RunPod Setup v8"
 echo "  ComfyUI: $COMFYUI"
 echo "════════════════════════════════════════"
 [ -d "$COMFYUI" ] || { echo "❌ НЕ НАЙДЕНО: $COMFYUI"; exit 1; }
