@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Прайд Лазер — Лазерная резка неметаллов под ключ</title>
+  <meta name="description" content="Лазерная резка неметаллов от макета до готового изделия за 24 часа. Точность 0,1 мм. Честные цены.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#08080a;--bg2:#0e0e11;--bg3:#15151a;
+      --L:#ff3c00;--Lg:rgba(255,60,0,.3);--Ls:rgba(255,60,0,.08);
+      --C:#00e5ff;--Cg:rgba(0,229,255,.2);
+      --t:#eaeaed;--td:#909098;--tm:#505058;
+      --ln:rgba(255,60,0,.06);--lnb:rgba(255,60,0,.15);
+      --D:'Oswald',sans-serif;--M:'JetBrains Mono',monospace
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--t);font-family:var(--D);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    .bg-grid{position:fixed;inset:0;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,#000 0%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,#000 0%,transparent 100%)}
+    .scan{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--L),transparent);box-shadow:0 0 30px var(--Lg);animation:sc 10s linear infinite;pointer-events:none;z-index:1}
+    @keyframes sc{0%{top:-2px;opacity:0}1%{opacity:.6}99%{opacity:.6}100%{top:100vh;opacity:0}}
+    .noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.25;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+    .w{max-width:1200px;margin:0 auto;padding:0 2rem;position:relative;z-index:3}
+    section{padding:6rem 0}
+    .div{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--lnb),transparent)}
+    .lb{font-family:var(--M);font-size:.7rem;color:var(--L);letter-spacing:.3em;text-transform:uppercase;margin-bottom:.75rem;font-weight:400}
+    .lb::after{content:'';display:inline-block;width:24px;height:1px;background:var(--L);vertical-align:middle;margin-left:12px}
+    h2{font-family:var(--D);font-size:clamp(2rem,4.5vw,3.5rem);font-weight:600;line-height:1.08;letter-spacing:-.02em;color:var(--t);margin-bottom:1.5rem}
+    .la{color:var(--L)}
+    .lead{font-family:var(--M);font-size:.9rem;color:var(--td);line-height:1.7;max-width:580px}
+    .lead b{color:var(--t);font-weight:500}
+    /* NAV */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 0;background:rgba(8,8,10,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--ln)}
+    .nav-i{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;justify-content:space-between;align-items:center}
+    .logo{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--t)}
+    .logo-d{width:28px;height:28px;background:var(--L);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);box-shadow:0 0 15px var(--Lg)}
+    .logo-t{font-family:var(--D);font-size:1.4rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase}
+    .logo-t em{font-style:normal;color:var(--L)}
+    .nl{display:flex;gap:2rem;list-style:none}
+    .nl a{font-family:var(--M);font-size:.75rem;color:var(--td);text-decoration:none;text-transform:uppercase;letter-spacing:.1em;transition:color .2s}
+    .nl a:hover{color:var(--t)}
+    .btn-a{font-family:var(--M);font-size:.75rem;padding:.5rem 1.25rem;background:transparent;color:var(--t);border:1px solid var(--lnb);cursor:pointer;text-decoration:none;text-transform:uppercase;letter-spacing:.1em;transition:all .25s}
+    .btn-a:hover{background:var(--L);border-color:var(--L);color:var(--bg);box-shadow:0 0 25px var(--Lg)}
+    .ham{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+    .ham span{width:22px;height:2px;background:var(--L)}
+    /* HERO */
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
+    .hero-lb{position:absolute;top:15%;right:12%;width:2px;height:70%;background:linear-gradient(180deg,transparent,var(--L),transparent);box-shadow:0 0 40px var(--Lg);animation:fl 3s ease-in-out infinite;transform:rotate(-3deg)}
+    @keyframes fl{0%,100%{opacity:.7}50%{opacity:.3}}
+    .hero-tg{position:absolute;top:42%;right:16%;width:100px;height:100px}
+    .hero-tg::before,.hero-tg::after{content:'';position:absolute;background:rgba(255,60,0,.3)}
+    .hero-tg::before{width:100%;height:1px;top:50%}
+    .hero-tg::after{width:1px;height:100%;left:50%}
+    .hero-p{max-width:720px;position:relative;z-index:4}
+    .hero-pre{font-family:var(--M);font-size:.8rem;color:var(--C);margin-bottom:2rem;display:flex;align-items:center;gap:.75rem;letter-spacing:.05em}
+    .hero-pre::before{content:'';width:30px;height:1px;background:var(--C)}
+    .hero-h{font-family:var(--D);font-size:clamp(2.8rem,6vw,5.5rem);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:2rem;color:var(--t)}
+    .hero-h .L{color:var(--L);text-shadow:0 0 40px var(--Lg);position:relative}
+    .hero-h .L::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:3px;background:var(--L);box-shadow:0 0 10px var(--Lg)}
+    .hero-d{font-family:var(--M);font-size:.92rem;color:var(--td);line-height:1.7;margin-bottom:2.5rem;max-width:540px}
+    .hero-d b{color:var(--t)}
+    .hero-acts{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center}
+    .btn-p{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--M);font-size:.82rem;font-weight:500;padding:1rem 2rem;background:var(--L);color:var(--bg);text-decoration:none;text-transform:uppercase;letter-spacing:.1em;border:none;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+    .btn-p::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .5s}
+    .btn-p:hover::before{left:100%}
+    .btn-p:hover{box-shadow:0 0 40px var(--Lg);transform:translateY(-2px)}
+    .btn-s{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--M);font-size:.82rem;padding:1rem 2rem;background:transparent;color:var(--t);text-decoration:none;border:1px solid var(--lnb);cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .2s}
+    .btn-s:hover{border-color:var(--L);color:var(--L);background:var(--Ls)}
+    .hero-stats{position:absolute;right:2rem;bottom:12%;display:flex;flex-direction:column;gap:2rem;border-left:1px solid var(--lnb);padding-left:2rem}
+    .hs-v{font-family:var(--D);font-size:2.5rem;font-weight:700;color:var(--t);line-height:1}
+    .hs-v .u{font-size:.9rem;color:var(--L);font-family:var(--M);margin-left:4px}
+    .hs-l{font-family:var(--M);font-size:.65rem;color:var(--tm);text-transform:uppercase;letter-spacing:.15em;margin-top:6px}
+    /* MATERIALS */
+    .mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:2px;margin-top:3rem}
+    .mat-c{padding:1.75rem .75rem;background:var(--bg2);border:1px solid var(--ln);transition:all .2s;cursor:default;text-align:center;position:relative;overflow:hidden}
+    .mat-c::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--Ls),transparent);opacity:0;transition:opacity .2s}
+    .mat-c:hover{border-color:var(--lnb);background:var(--bg3)}
+    .mat-c:hover::after{opacity:1}
+    .mat-i{font-size:1.5rem;margin-bottom:.75rem;display:block;position:relative;z-index:1}
+    .mat-n{font-family:var(--M);font-size:.7rem;color:var(--t);font-weight:500;text-transform:uppercase;letter-spacing:.05em;position:relative;z-index:1}
+    /* SERVICES */
+    .svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2px;margin-top:3rem;background:var(--lnb)}
+    .svc-c{background:var(--bg2);padding:2.5rem 2rem 2rem;position:relative;transition:background .2s}
+    .svc-c:hover{background:var(--bg3)}
+    .svc-n{font-family:var(--M);font-size:.65rem;color:var(--L);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem}
+    .svc-t{font-family:var(--D);font-size:1.5rem;font-weight:600;color:var(--t);margin-bottom:.5rem;line-height:1.15}
+    .svc-d{font-size:.9rem;color:var(--td);line-height:1.6;font-family:var(--M);font-weight:300}
+    /* STATS */
+    .stats-bg{background:var(--bg2);position:relative}
+    .stats-bg::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--L),transparent)}
+    .s-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2px;margin-top:3rem;background:var(--lnb)}
+    .s-c{background:var(--bg2);padding:2.5rem 1.5rem;text-align:center;position:relative;transition:background .2s}
+    .s-c::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--L);transform:scaleX(0);transition:transform .3s}
+    .s-c:hover::after{transform:scaleX(1)}
+    .s-c:hover{background:var(--bg3)}
+    .s-v{font-family:var(--D);font-size:clamp(2.5rem,4vw,3.5rem);font-weight:700;color:var(--L);line-height:1;text-shadow:0 0 40px var(--Lg);margin-bottom:.5rem}
+    .s-l{font-family:var(--M);font-size:.7rem;color:var(--tm);text-transform:uppercase;letter-spacing:.15em}
+    /* PROMISES */
+    .prom{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:3rem;background:var(--lnb)}
+    .pr{padding:2rem;background:var(--bg2);display:flex;gap:1.25rem;align-items:flex-start;transition:background .2s;position:relative}
+    .pr::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--L);opacity:.5}
+    .pr:hover{background:var(--bg3)}
+    .pr-ico{flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--Ls);border:1px solid var(--ln);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+    .pr-ico span{font-size:1.1rem}
+    .pr-c{flex:1}
+    .pr-t{font-family:var(--D);font-size:1.1rem;font-weight:500;color:var(--t);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
+    .pr-d{font-family:var(--M);font-size:.78rem;color:var(--td);line-height:1.6;font-weight:300}
+    .pr-d em{font-style:normal;color:var(--L)}
+    /* CTA */
+    .cta-sec{text-align:center;padding:8rem 0;position:relative}
+    .cta-sec::before{content:'';position:absolute;left:50%;top:0;width:200px;height:200px;transform:translateX(-50%);background:radial-gradient(circle,var(--Ls) 0%,transparent 70%);pointer-events:none}
+    .cta-h{font-family:var(--D);font-size:clamp(2rem,4.5vw,3.5rem);font-weight:700;color:var(--t);margin-bottom:1.5rem;line-height:1.1}
+    .cta-d{font-family:var(--M);font-size:.85rem;color:var(--td);line-height:1.7;margin-bottom:3rem;max-width:500px;margin-left:auto;margin-right:auto}
+    .cta-time{font-family:var(--M);font-size:.8rem;color:var(--C);margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:.5rem}
+    .cta-time::before{content:'⏱';font-size:1rem}
+    .cta-acts{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
+    /* FOOTER */
+    footer{padding:4rem 0;border-top:1px solid var(--ln);text-align:center}
+    .ft-brand{font-family:var(--D);font-size:1.2rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+    .ft-brand em{font-style:normal;color:var(--L)}
+    .ft-slogan{font-family:var(--M);font-size:.7rem;color:var(--tm);text-transform:uppercase;letter-spacing:.15em;margin-bottom:2rem}
+    .ft-line{width:60px;height:1px;background:var(--L);margin:0 auto 2rem}
+    /* REVEAL ANIMATIONS */
+    .rv{opacity:0;transform:translateY(30px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
+    .rv.v{opacity:1;transform:translateY(0)}
+    /* MOBILE */
+    @media(max-width:900px){
+      .nav-links{display:none}
+      .ham{display:flex}
+      .hero-stats{display:none}
+      .hero-h{font-size:clamp(2rem,10vw,3.5rem)}
+      .hero-tg{opacity:.15}
+      .prom{grid-template-columns:1fr}
+      .hero-lb{opacity:.2}
+      section{padding:4rem 0}
+    }
+    @media(max-width:600px){
+      .hero-acts{flex-direction:column;align-items:flex-start}
+      .cta-acts{flex-direction:column;align-items:center}
+      .btn-p,.btn-s{width:100%;justify-content:center;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scan"></div>
+  <div class="noise"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-i">
+      <a href="#" class="logo">
+        <div class="logo-d"></div>
+        <span class="logo-t"><em>Прайд</em> Лазер</span>
+      </a>
+      <ul class="nl">
+        <li><a href="#materials">Материалы</a></li>
+        <li><a href="#services">Услуги</a></li>
+        <li><a href="#stats">Точность</a></li>
+        <li><a href="#promises">Почему мы</a></li>
+      </ul>
+      <a href="#contact" class="btn-a">Рассчитать</a>
+      <button class="ham" id="ham"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-lb"></div>
+    <div class="hero-tg"></div>
+    <div class="w">
+      <div class="hero-p">
+        <p class="hero-pre">Лазерная резка — точность до 0,1 мм</p>
+        <h1 class="hero-h">Режем <span class="L">неметаллы</span> точно<br>и под ключ</h1>
+        <p class="hero-d">От макета до готового изделия — <b>за 24 часа</b>. Рабочее поле до 1600×1000 мм. <b>Разработка макета бесплатно</b> при заказе от 10 000 ₽.</p>
+        <div class="hero-acts">
+          <a href="#contact" class="btn-p">Рассчитать за 30 мин →</a>
+          <a href="#services" class="btn-s">Что входит</a>
+        </div>
+      </div>
+      <div class="stats-right hero-stats">
+        <div>
+          <div class="hs-v">0,1<span class="u">мм</span></div>
+          <div class="hs-l">Точность реза</div>
+        </div>
+        <div>
+          <div class="hs-v">24<span class="u">ч</span></div>
+          <div class="hs-l">Срочные заказы</div>
+        </div>
+        <div>
+          <div class="hs-v">1600<span class="u">×1000</span></div>
+          <div class="hs-l">Поле, мм</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <!-- MATERIALS -->
+  <section id="materials">
+    <div class="w">
+      <div class="rv">
+        <p class="lb">Материалы</p>
+        <h2>Режем всё, <span class="la">кроме металла</span></h2>
+        <p class="lead">Оргстекло, фанера, кожа, ткань, резина, пластик, <b>более 15 материалов</b> — и всё это на одном оборудовании.</p>
+      </div>
+      <div class="mat-grid rv">
+        <div class="mat-c"><span class="mat-i">◇</span><span class="mat-n">Оргстекло</span></div>
+        <div class="mat-c"><span class="mat-i">▣</span><span class="mat-n">Пластик</span></div>
+        <div class="mat-c"><span class="mat-i">▦</span><span class="mat-n">ПВХ</span></div>
+        <div class="mat-c"><span class="mat-i">◇</span><span class="mat-n">Поликарбонат</span></div>
+        <div class="mat-c"><span class="mat-i">▤</span><span class="mat-n">Фанера</span></div>
+        <div class="mat-c"><span class="mat-i">▥</span><span class="mat-n">МДФ</span></div>
+        <div class="mat-c"><span class="mat-i">▣</span><span class="mat-n">Дерево</span></div>
+        <div class="mat-c"><span class="mat-i">◈</span><span class="mat-n">Кожа</span></div>
+        <div class="mat-c"><span class="mat-i">▤</span><span class="mat-n">Ткань</span></div>
+        <div class="mat-c"><span class="mat-i">▥</span><span class="mat-n">Войлок</span></div>
+        <div class="mat-c"><span class="mat-i">◉</span><span class="mat-n">Резина</span></div>
+        <div class="mat-c"><span class="mat-i">▦</span><span class="mat-n">Поролон</span></div>
+        <div class="mat-c"><span class="mat-i">▣</span><span class="mat-n">Пенокартон</span></div>
+        <div class="mat-c"><span class="mat-i">◇</span><span class="mat-n">Композиты</span></div>
+        <div class="mat-c"><span class="mat-i">◆</span><span class="mat-n">Спецматериалы</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="w">
+      <div class="rv">
+        <p class="lb">Под ключ</p>
+        <h2>Вы получаете <span class="la">готовое изделие</span></h2>
+        <p class="lead">Не просто «лист с дырками», а законченный продукт — с макетом, обработкой и доставкой.</p>
+      </div>
+      <div class="svc rv">
+        <div class="svc-c">
+          <div class="svc-n">01</div>
+          <h3 class="svc-t">Разработка макета</h3>
+          <p class="svc-d">Бесплатно при заказе от 10 000 ₽. Работаем с вашим чертежом или создаём с нуля.</p>
+        </div>
+        <div class="svc-c">
+          <div class="svc-n">02</div>
+          <h3 class="svc-t">Лазерная резка</h3>
+          <p class="svc-d">Точность ±0,1 мм. До 1600×1000 мм. Контроль качества на каждом этапе.</p>
+        </div>
+        <div class="svc-c">
+          <div class="svc-n">03</div>
+          <h3 class="svc-t">Обработка</h3>
+          <p class="svc-d">Гибка, склейка, сборка, покраска — всё в одном месте, без субподряда.</p>
+        </div>
+        <div class="svc-c">
+          <div class="svc-n">04</div>
+          <h3 class="svc-t">Доставка по России</h3>
+          <p class="svc-d">Упакуем надёжно. Отправим СДЭК, почтой или курьером — куда скажете.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-bg" id="stats">
+    <div class="w">
+      <div class="rv">
+        <p class="lb">Точность</p>
+        <h2>Цифры, <span class="la">которые говорят</span> сами</h2>
+      </div>
+      <div class="s-grid rv">
+        <div class="s-c"><div class="s-v">±0,05</div><div class="s-l">Повторяемость, мм</div></div>
+        <div class="s-c"><div class="s-v">0,1</div><div class="s-l">Точность реза, мм</div></div>
+        <div class="s-c"><div class="s-v">24ч</div><div class="s-l">Минимальный срок</div></div>
+        <div class="s-c"><div class="s-v">1600×1000</div><div class="s-l">Поле, мм</div></div>
+        <div class="s-c"><div class="s-v">1</div><div class="s-l">Минимальный заказ, шт</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <!-- PROMISES -->
+  <section id="promises">
+    <div class="w">
+      <div class="rv">
+        <p class="lb">Почему мы</p>
+        <h2>Клиенты <span class="la">возвращаются</span>, потому что</h2>
+      </div>
+      <div class="prom rv">
+        <div class="pr"><div class="pr-ico"><span>₽</span></div><div class="pr-c"><div class="pr-t">Не завышаем</div><div class="pr-d">Честная цена <em>без «лишних запасов»</em> в смете.</div></div></div>
+        <div class="pr"><div class="pr-ico"><span>⏱</span></div><div class="pr-c"><div class="pr-t">Не обещаем золотые горы</div><div class="pr-d">Говорим <em>реальные сроки</em> и укладываемся в них.</div></div></div>
+        <div class="pr"><div class="pr-ico"><span>📞</span></div><div class="pr-c"><div class="pr-t">Не теряемся</div><div class="pr-d">Персональный менеджер <em>на связи 24/7</em>.</div></div></div>
+        <div class="pr"><div class="pr-ico"><span>✓</span></div><div class="pr-c"><div class="pr-t">Не косячим</div><div class="pr-d">Повторяемость <em>±0,05 мм</em> на всей партии.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-sec" id="contact">
+    <div class="w">
+      <div class="rv">
+        <p class="cta-time">Рассчитаем стоимость за 30 минут</p>
+        <h2 class="cta-h">Отправьте чертёж — <span class="la">получите расчёт</span></h2>
+        <p class="cta-d">Напишите нам — обсудим задачу, подберём материал и назовём точную цену.</p>
+        <div class="cta-acts">
+          <a href="https://t.me/Pride_Decor" class="btn-p" target="_blank">Написать в Telegram →</a>
+          <a href="tel:+79854300273" class="btn-s">+7 (985) 430-02-73</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="w">
+      <div class="ft-brand"><em>Прайд</em> Лазер</div>
+      <div class="ft-slogan">Режем точнее, чем конкуренты обещают</div>
+      <div class="ft-line"></div>
+    </div>
+  </footer>
+
+  <!-- SCROLL REVEAL -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Scroll reveal
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('v');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+      // Smooth scroll for nav links
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const target = document.querySelector(a.getAttribute('href'));
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      // Hamburger menu toggle
+      const ham = document.getElementById('ham');
+      const navLinks = document.querySelector('.nl');
+      if (ham && navLinks) {
+        ham.addEventListener('click', () => {
+          const open = navLinks.style.display === 'flex';
+          navLinks.style.display = open ? 'none' : 'flex';
+          navLinks.style.position = 'fixed';
+          navLinks.style.top = '60px';
+          navLinks.style.left = '0';
+          navLinks.style.right = '0';
+          navLinks.style.background = 'rgba(8,8,10,.97)';
+          navLinks.style.flexDirection = 'column';
+          navLinks.style.padding = '1.5rem 2rem';
+          navLinks.style.gap = '1.25rem';
+          navLinks.style.borderBottom = '1px solid rgba(255,60,0,.15)';
+          navLinks.style.backdropFilter = 'blur(16px)';
+          navLinks.style.zIndex = '99';
+          navLinks.style.display = open ? 'none' : 'flex';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
